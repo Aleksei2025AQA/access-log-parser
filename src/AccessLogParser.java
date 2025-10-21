@@ -15,7 +15,6 @@ public class AccessLogParser {
         System.out.println("Разность: " + difference);
         System.out.println("Произведение: " + product);
         System.out.println("Частное: " + quotient);
-
         scanner.close();
     }
 }
