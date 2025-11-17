@@ -6,7 +6,6 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int fileCounter = 0;
-
         while (true) {
             System.out.print("Введите путь к файлу: ");
             String filePath = scanner.nextLine();
