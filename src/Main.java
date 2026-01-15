@@ -43,8 +43,8 @@ public class Main {
             BufferedReader reader = new BufferedReader(fileReader);
 
             int lineCount = 0;
-            int maxLength = 0;
-            int minLength = Integer.MAX_VALUE;
+            int googlebotCount = 0;
+            int yandexbotCount = 0;
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -55,12 +55,13 @@ public class Main {
                     throw new LineTooLongException("Строка #" + lineCount + " превышает 1024 символа. Длина: " + length);
                 }
 
-                if (length > maxLength) {
-                    maxLength = length;
-                }
-
-                if (length < minLength) {
-                    minLength = length;
+                String userAgent = extractUserAgent(line);
+                if (userAgent != null) {
+                    if ("Googlebot".equals(userAgent)) {
+                        googlebotCount++;
+                    } else if ("YandexBot".equals(userAgent)) {
+                        yandexbotCount++;
+                    }
                 }
             }
 
@@ -68,12 +69,15 @@ public class Main {
 
             System.out.println("\nСтатистика файла:");
             System.out.println("Общее количество строк: " + lineCount);
-            System.out.println("Длина самой длинной строки: " + maxLength);
 
-            if (minLength == Integer.MAX_VALUE) {
-                System.out.println("Длина самой короткой строки: 0 (файл пуст)");
+            if (lineCount > 0) {
+                double googlebotShare = (double) googlebotCount / lineCount * 100;
+                double yandexbotShare = (double) yandexbotCount / lineCount * 100;
+
+                System.out.printf("Запросов от Googlebot: %.2f%%\n", googlebotShare);
+                System.out.printf("Запросов от YandexBot: %.2f%%\n", yandexbotShare);
             } else {
-                System.out.println("Длина самой короткой строки: " + minLength);
+                System.out.println("Файл пуст");
             }
 
         } catch (FileNotFoundException e) {
@@ -85,5 +89,32 @@ public class Main {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static String extractUserAgent(String logLine) {
+        try {
+            int startBracket = logLine.indexOf('(');
+            int endBracket = logLine.indexOf(')', startBracket);
+
+            if (startBracket == -1 || endBracket == -1) {
+                return null;
+            }
+
+            String firstBrackets = logLine.substring(startBracket + 1, endBracket);
+
+            String[] parts = firstBrackets.split(";");
+
+            if (parts.length >= 2) {
+                String fragment = parts[1].trim();
+
+                int slashIndex = fragment.indexOf('/');
+                if (slashIndex != -1) {
+                    return fragment.substring(0, slashIndex).trim();
+                }
+                return fragment;
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 }
