@@ -45,23 +45,32 @@ public class Main {
             int lineCount = 0;
             int googlebotCount = 0;
             int yandexbotCount = 0;
+            Statistics statistics = new Statistics();
             String line;
 
             while ((line = reader.readLine()) != null) {
                 lineCount++;
-                int length = line.length();
 
-                if (length > 1024) {
-                    throw new LineTooLongException("Строка #" + lineCount + " превышает 1024 символа. Длина: " + length);
+                if (line.length() > 1024) {
+                    throw new LineTooLongException("Строка #" + lineCount + " превышает 1024 символа. Длина: " + line.length());
                 }
 
-                String userAgent = extractUserAgent(line);
-                if (userAgent != null) {
-                    if ("Googlebot".equals(userAgent)) {
+                try {
+                    LogEntry logEntry = new LogEntry(line);
+
+                    statistics.addEntry(logEntry);
+
+                    UserAgent userAgent = logEntry.getUserAgent();
+                    String agentString = userAgent.getBrowser();
+
+                    if ("Googlebot".equals(agentString)) {
                         googlebotCount++;
-                    } else if ("YandexBot".equals(userAgent)) {
+                    } else if ("YandexBot".equals(agentString)) {
                         yandexbotCount++;
                     }
+
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Ошибка парсинга строки #" + lineCount + ": " + e.getMessage());
                 }
             }
 
@@ -76,45 +85,23 @@ public class Main {
 
                 System.out.printf("Запросов от Googlebot: %.2f%%\n", googlebotShare);
                 System.out.printf("Запросов от YandexBot: %.2f%%\n", yandexbotShare);
+
+                System.out.println("\nСтатистика трафика:");
+                System.out.println("Общий трафик: " + statistics.getTotalTraffic() + " байт");
+                System.out.printf("Средний трафик в час: %.2f байт/час\n", statistics.getTrafficRate());
+
+                if (statistics.getMinTime() != null && statistics.getMaxTime() != null) {
+                    System.out.println("Период логов: с " + statistics.getMinTime() + " по " + statistics.getMaxTime());
+                }
             } else {
                 System.out.println("Файл пуст");
             }
-
         } catch (FileNotFoundException e) {
             System.out.println("Файл не найден: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("Ошибка чтения файла: " + e.getMessage());
-        } catch (LineTooLongException e) {
-            System.out.println("Ошибка: " + e.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new RuntimeException(ex);
         }
-    }
-
-    private static String extractUserAgent(String logLine) {
-        try {
-            int startBracket = logLine.indexOf('(');
-            int endBracket = logLine.indexOf(')', startBracket);
-
-            if (startBracket == -1 || endBracket == -1) {
-                return null;
-            }
-
-            String firstBrackets = logLine.substring(startBracket + 1, endBracket);
-
-            String[] parts = firstBrackets.split(";");
-
-            if (parts.length >= 2) {
-                String fragment = parts[1].trim();
-
-                int slashIndex = fragment.indexOf('/');
-                if (slashIndex != -1) {
-                    return fragment.substring(0, slashIndex).trim();
-                }
-                return fragment;
-            }
-        } catch (Exception e) {
-        }
-        return null;
     }
 }
