@@ -1,5 +1,7 @@
 import java.io.*;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Main {
 
@@ -76,7 +78,7 @@ public class Main {
 
             reader.close();
 
-            System.out.println("\nСтатистика файла:");
+            System.out.println("\n=== Статистика файла ===");
             System.out.println("Общее количество строк: " + lineCount);
 
             if (lineCount > 0) {
@@ -86,13 +88,53 @@ public class Main {
                 System.out.printf("Запросов от Googlebot: %.2f%%\n", googlebotShare);
                 System.out.printf("Запросов от YandexBot: %.2f%%\n", yandexbotShare);
 
-                System.out.println("\nСтатистика трафика:");
+                System.out.println("\n=== Статистика трафика ===");
                 System.out.println("Общий трафик: " + statistics.getTotalTraffic() + " байт");
                 System.out.printf("Средний трафик в час: %.2f байт/час\n", statistics.getTrafficRate());
 
                 if (statistics.getMinTime() != null && statistics.getMaxTime() != null) {
                     System.out.println("Период логов: с " + statistics.getMinTime() + " по " + statistics.getMaxTime());
                 }
+
+                System.out.println("\n=== Результаты задания (Collections) ===");
+
+                Set<String> existingPages = statistics.getAllExistingPages();
+                System.out.println("\n1. Существующие страницы (код 200):");
+                System.out.println("   Всего: " + existingPages.size() + " уникальных страниц");
+                if (!existingPages.isEmpty()) {
+                    System.out.println("   Список:");
+                    int counter = 1;
+                    for (String page : existingPages) {
+                        System.out.println("   " + counter + ". " + page);
+                        counter++;
+                        if (counter > 10) {
+                            System.out.println("   ... и еще " + (existingPages.size() - 10) + " страниц");
+                            break;
+                        }
+                    }
+                }
+
+                Map<String, Double> osStats = statistics.getOperatingSystemStatistics();
+                System.out.println("\n2. Статистика операционных систем (доля):");
+                if (!osStats.isEmpty()) {
+                    System.out.println("   ОС           | Доля");
+                    System.out.println("   -------------|--------");
+                    for (Map.Entry<String, Double> entry : osStats.entrySet()) {
+                        System.out.printf("   %-12s | %.3f (%.1f%%)\n",
+                                entry.getKey(),
+                                entry.getValue(),
+                                entry.getValue() * 100);
+                    }
+
+                    double sum = 0;
+                    for (Double value : osStats.values()) {
+                        sum += value;
+                    }
+                    System.out.printf("   Сумма долей: %.4f (должно быть ~1.0000)\n", sum);
+                } else {
+                    System.out.println("   Нет данных об операционных системах");
+                }
+
             } else {
                 System.out.println("Файл пуст");
             }
