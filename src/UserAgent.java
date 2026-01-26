@@ -36,15 +36,15 @@ public class UserAgent {
     private String extractBrowser(String userAgent) {
         String ua = userAgent.toLowerCase();
 
-                if (ua.contains("googlebot")) {
+        if (ua.contains("googlebot")) {
             return "Googlebot";
         } else if (ua.contains("yandexbot")) {
             return "YandexBot";
         }
 
-                if (ua.contains("edge") || ua.contains("edg/")) {
+        if (ua.contains("edge") || ua.contains("edg/")) {
             return "Edge";
-        } else if (ua.contains("firefox") ||  ua.contains("fxios")) {
+        } else if (ua.contains("firefox") || ua.contains("fxios")) {
             return "Firefox";
         } else if (ua.contains("chrome") && !ua.contains("chromium")) {
             return "Chrome";

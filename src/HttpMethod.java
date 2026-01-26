@@ -1,5 +1,13 @@
 public enum HttpMethod {
-    GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, CONNECT, TRACE;
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    CONNECT,
+    TRACE;
 
     public static HttpMethod fromString(String method) {
         try {

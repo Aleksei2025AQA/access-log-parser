@@ -100,8 +100,10 @@ public class Main {
             System.out.println("Файл не найден: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("Ошибка чтения файла: " + e.getMessage());
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+        } catch (LineTooLongException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

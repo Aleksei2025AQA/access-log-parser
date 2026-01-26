@@ -2,6 +2,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class Statistics {
+
     private int totalTraffic;
     private LocalDateTime minTime;
     private LocalDateTime maxTime;
