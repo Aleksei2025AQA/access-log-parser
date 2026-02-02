@@ -1,4 +1,6 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -125,7 +127,6 @@ public class Main {
                                 entry.getValue(),
                                 entry.getValue() * 100);
                     }
-
                     double sum = 0;
                     for (Double value : osStats.values()) {
                         sum += value;
@@ -134,14 +135,45 @@ public class Main {
                 } else {
                     System.out.println("   Нет данных об операционных системах");
                 }
+                System.out.println("\n=== Несуществующие страницы (код 404) ===");
+                Set<String> notFoundPages = statistics.getNotFoundPages();
+                System.out.println("Всего несуществующих страниц: " + notFoundPages.size());
+                if (!notFoundPages.isEmpty()) {
+                    System.out.println("Первые 10 несуществующих страниц:");
+                    int counter = 1;
+                    for (String page : notFoundPages) {
+                        System.out.println("   " + counter + ". " + page);
+                        counter++;
+                        if (counter > 10) {
+                            System.out.println("   ... и еще " + (notFoundPages.size() - 10) + " страниц");
+                            break;
+                        }
+                    }
+                }
 
+                System.out.println("\n=== Статистика браузеров ===");
+                Map<String, Double> browserStats = statistics.getBrowserStatistics();
+                if (!browserStats.isEmpty()) {
+                    System.out.println("   Браузер       | Доля");
+                    System.out.println("   --------------|--------");
+                    for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
+                        System.out.printf("   %-13s | %.3f (%.1f%%)\n",
+                                entry.getKey(),
+                                entry.getValue(),
+                                entry.getValue() * 100);
+                    }
+
+                    double sum = 0;
+                    for (Double value : browserStats.values()) {
+                        sum += value;
+                    }
+                    System.out.printf("   Сумма долей: %.4f\n", sum);
+                } else {
+                    System.out.println("   Нет данных о браузерах");
+                }
             } else {
                 System.out.println("Файл пуст");
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("Файл не найден: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("Ошибка чтения файла: " + e.getMessage());
         } catch (LineTooLongException e) {
             System.out.println("Ошибка: " + e.getMessage());
         } catch (Exception e) {

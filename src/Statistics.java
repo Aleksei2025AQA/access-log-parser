@@ -11,7 +11,9 @@ public class Statistics {
     private LocalDateTime minTime;
     private LocalDateTime maxTime;
     private HashSet<String> existingPages = new HashSet<>();
+    private HashSet<String> notFoundPages = new HashSet<>();
     private HashMap<String, Integer> osCount = new HashMap<>();
+    private HashMap<String, Integer> browserCount = new HashMap<>();
 
     public Statistics() {
         this.totalTraffic = 0;
@@ -20,7 +22,6 @@ public class Statistics {
     }
 
     public void addEntry(LogEntry entry) {
-
         totalTraffic += entry.getResponseSize();
 
         LocalDateTime entryTime = entry.getTime();
@@ -35,6 +36,9 @@ public class Statistics {
             existingPages.add(entry.getPath());
         }
 
+        if (entry.getResponseCode() == 404) {
+            notFoundPages.add(entry.getPath());
+        }
 
         UserAgent userAgent = entry.getUserAgent();
         if (userAgent != null) {
@@ -42,9 +46,37 @@ public class Statistics {
             if (osType != null && !osType.isEmpty()) {
                 osCount.put(osType, osCount.getOrDefault(osType, 0) + 1);
             }
+
+            String browser = userAgent.getBrowser();
+            if (browser != null && !browser.isEmpty()) {
+                browserCount.put(browser, browserCount.getOrDefault(browser, 0) + 1);
+            }
         }
     }
 
+    public Set<String> getNotFoundPages() {
+        return new HashSet<>(notFoundPages);
+    }
+
+    public Map<String, Double> getBrowserStatistics() {
+        Map<String, Double> browserStatistics = new HashMap<>();
+
+        if (browserCount.isEmpty()) {
+            return browserStatistics;
+        }
+
+        int total = 0;
+        for (int count : browserCount.values()) {
+            total += count;
+        }
+
+        for (Map.Entry<String, Integer> entry : browserCount.entrySet()) {
+            double share = (double) entry.getValue() / total;
+            browserStatistics.put(entry.getKey(), share);
+        }
+
+        return browserStatistics;
+    }
 
     public double getTrafficRate() {
         if (minTime == null || maxTime == null || minTime.equals(maxTime)) {
