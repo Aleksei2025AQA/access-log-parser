@@ -43,7 +43,6 @@ public class LogEntry {
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
 
-    /
 
     public LogEntry(String logLine) {
         Matcher matcher = LOG_PATTERN.matcher(logLine);
@@ -71,7 +70,7 @@ public class LogEntry {
     }
 
     private int parseResponseSize(String sizeStr) {
-        if (sizeStr == null sizeStr.equals("-") sizeStr.isEmpty()){
+        if (sizeStr == null || sizeStr.equals("-") || sizeStr.isEmpty()) {
             return 0;
         }
         try {
