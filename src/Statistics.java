@@ -15,6 +15,10 @@ public class Statistics {
     private HashMap<String, Integer> osCount = new HashMap<>();
     private HashMap<String, Integer> browserCount = new HashMap<>();
 
+    private int errorRequestsCount = 0;
+    private int nonBotVisitsCount = 0;
+    private HashSet<String> nonBotUniqueIPs = new HashSet<>();
+
     public Statistics() {
         this.totalTraffic = 0;
         this.minTime = null;
@@ -32,6 +36,28 @@ public class Statistics {
             maxTime = entryTime;
         }
 
+        if (entry.getResponseCode() >= 400 && entry.getResponseCode() < 600) {
+            errorRequestsCount++;
+        }
+
+        UserAgent userAgent = entry.getUserAgent();
+        boolean isBot = false;
+
+        if (userAgent != null) {
+            String userAgentString = userAgent.getBrowser();
+            if (userAgentString != null) {
+                String lowerAgent = userAgentString.toLowerCase();
+                if (lowerAgent.contains("bot")) {
+                    isBot = true;
+                }
+            }
+        }
+
+        if (!isBot) {
+            nonBotVisitsCount++;
+            nonBotUniqueIPs.add(entry.getIpAddr());
+        }
+
         if (entry.getResponseCode() == 200) {
             existingPages.add(entry.getPath());
         }
@@ -40,7 +66,6 @@ public class Statistics {
             notFoundPages.add(entry.getPath());
         }
 
-        UserAgent userAgent = entry.getUserAgent();
         if (userAgent != null) {
             String osType = userAgent.getOsType();
             if (osType != null && !osType.isEmpty()) {
@@ -52,6 +77,56 @@ public class Statistics {
                 browserCount.put(browser, browserCount.getOrDefault(browser, 0) + 1);
             }
         }
+    }
+
+    public double getAverageVisitsPerHour() {
+        if (minTime == null || maxTime == null || minTime.equals(maxTime) || nonBotVisitsCount == 0){
+            return 0.0;
+        }
+
+        long hours = getHoursBetweenMinMax();
+        if (hours == 0) {
+            hours = 1;
+        }
+
+        return (double) nonBotVisitsCount / hours;
+    }
+
+    public double getAverageErrorRequestsPerHour() {
+        if (minTime == null || maxTime == null || minTime.equals(maxTime) || errorRequestsCount == 0){
+            return 0.0;
+        }
+
+        long hours = getHoursBetweenMinMax();
+        if (hours == 0) {
+            hours = 1;
+        }
+
+        return (double) errorRequestsCount / hours;
+    }
+
+    public double getAverageVisitsPerUser() {
+        if (nonBotUniqueIPs.isEmpty() || nonBotVisitsCount == 0){
+            return 0.0;
+        }
+
+        return (double) nonBotVisitsCount / nonBotUniqueIPs.size();
+    }
+
+    private long getHoursBetweenMinMax() {
+        return Duration.between(minTime, maxTime).toHours();
+    }
+
+    public int getErrorRequestsCount() {
+        return errorRequestsCount;
+    }
+
+    public int getNonBotVisitsCount() {
+        return nonBotVisitsCount;
+    }
+
+    public int getNonBotUniqueIPsCount() {
+        return nonBotUniqueIPs.size();
     }
 
     public Set<String> getNotFoundPages() {
@@ -79,10 +154,10 @@ public class Statistics {
     }
 
     public double getTrafficRate() {
-        if (minTime == null || maxTime == null || minTime.equals(maxTime)) {
+        if (minTime == null || maxTime == null || minTime.equals(maxTime)){
             return 0.0;
         }
-        long hours = Duration.between(minTime, maxTime).toHours();
+        long hours = getHoursBetweenMinMax();
         if (hours == 0) {
             hours = 1;
         }

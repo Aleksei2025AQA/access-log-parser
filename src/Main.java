@@ -98,8 +98,15 @@ public class Main {
                     System.out.println("Период логов: с " + statistics.getMinTime() + " по " + statistics.getMaxTime());
                 }
 
-                System.out.println("\n=== Результаты задания (Collections) ===");
+                System.out.println("\n=== Новая статистика (Stream API) ===");
+                System.out.printf("Среднее количество посещений в час (только пользователи): %.2f\n",
+                        statistics.getAverageVisitsPerHour());
+                System.out.printf("Среднее количество ошибочных запросов в час: %.2f\n",
+                        statistics.getAverageErrorRequestsPerHour());
+                System.out.printf("Средняя посещаемость одним пользователем: %.2f\n",
+                        statistics.getAverageVisitsPerUser());
 
+                System.out.println("\n=== Результаты задания (Collections) ===");
                 Set<String> existingPages = statistics.getAllExistingPages();
                 System.out.println("\n1. Существующие страницы (код 200):");
                 System.out.println("   Всего: " + existingPages.size() + " уникальных страниц");
@@ -115,7 +122,6 @@ public class Main {
                         }
                     }
                 }
-
                 Map<String, Double> osStats = statistics.getOperatingSystemStatistics();
                 System.out.println("\n2. Статистика операционных систем (доля):");
                 if (!osStats.isEmpty()) {
