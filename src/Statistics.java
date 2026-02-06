@@ -80,7 +80,7 @@ public class Statistics {
     }
 
     public double getAverageVisitsPerHour() {
-        if (minTime == null || maxTime == null || minTime.equals(maxTime) || nonBotVisitsCount == 0){
+        if (minTime == null || maxTime == null || minTime.equals(maxTime) || nonBotVisitsCount == 0) {
             return 0.0;
         }
 
@@ -93,7 +93,7 @@ public class Statistics {
     }
 
     public double getAverageErrorRequestsPerHour() {
-        if (minTime == null || maxTime == null || minTime.equals(maxTime) || errorRequestsCount == 0){
+        if (minTime == null || maxTime == null || minTime.equals(maxTime) || errorRequestsCount == 0) {
             return 0.0;
         }
 
@@ -106,7 +106,7 @@ public class Statistics {
     }
 
     public double getAverageVisitsPerUser() {
-        if (nonBotUniqueIPs.isEmpty() || nonBotVisitsCount == 0){
+        if (nonBotUniqueIPs.isEmpty() || nonBotVisitsCount == 0) {
             return 0.0;
         }
 
@@ -154,7 +154,7 @@ public class Statistics {
     }
 
     public double getTrafficRate() {
-        if (minTime == null || maxTime == null || minTime.equals(maxTime)){
+        if (minTime == null || maxTime == null || minTime.equals(maxTime)) {
             return 0.0;
         }
         long hours = getHoursBetweenMinMax();
