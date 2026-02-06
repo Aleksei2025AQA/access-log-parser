@@ -15,6 +15,14 @@ public class UserAgent {
         return browser;
     }
 
+    public boolean isBot() {
+        if (browser == null) {
+            return false;
+        }
+        String browserLower = browser.toLowerCase();
+        return browserLower.contains("bot");
+    }
+
     private String extractOsType(String userAgent) {
         String ua = userAgent.toLowerCase();
 
