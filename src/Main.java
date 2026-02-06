@@ -1,4 +1,6 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -96,8 +98,15 @@ public class Main {
                     System.out.println("Период логов: с " + statistics.getMinTime() + " по " + statistics.getMaxTime());
                 }
 
-                System.out.println("\n=== Результаты задания (Collections) ===");
+                System.out.println("\n=== Новая статистика (Stream API) ===");
+                System.out.printf("Среднее количество посещений в час (только пользователи): %.2f\n",
+                        statistics.getAverageVisitsPerHour());
+                System.out.printf("Среднее количество ошибочных запросов в час: %.2f\n",
+                        statistics.getAverageErrorRequestsPerHour());
+                System.out.printf("Средняя посещаемость одним пользователем: %.2f\n",
+                        statistics.getAverageVisitsPerUser());
 
+                System.out.println("\n=== Результаты задания (Collections) ===");
                 Set<String> existingPages = statistics.getAllExistingPages();
                 System.out.println("\n1. Существующие страницы (код 200):");
                 System.out.println("   Всего: " + existingPages.size() + " уникальных страниц");
@@ -113,7 +122,6 @@ public class Main {
                         }
                     }
                 }
-
                 Map<String, Double> osStats = statistics.getOperatingSystemStatistics();
                 System.out.println("\n2. Статистика операционных систем (доля):");
                 if (!osStats.isEmpty()) {
@@ -125,7 +133,6 @@ public class Main {
                                 entry.getValue(),
                                 entry.getValue() * 100);
                     }
-
                     double sum = 0;
                     for (Double value : osStats.values()) {
                         sum += value;
@@ -134,14 +141,45 @@ public class Main {
                 } else {
                     System.out.println("   Нет данных об операционных системах");
                 }
+                System.out.println("\n=== Несуществующие страницы (код 404) ===");
+                Set<String> notFoundPages = statistics.getNotFoundPages();
+                System.out.println("Всего несуществующих страниц: " + notFoundPages.size());
+                if (!notFoundPages.isEmpty()) {
+                    System.out.println("Первые 10 несуществующих страниц:");
+                    int counter = 1;
+                    for (String page : notFoundPages) {
+                        System.out.println("   " + counter + ". " + page);
+                        counter++;
+                        if (counter > 10) {
+                            System.out.println("   ... и еще " + (notFoundPages.size() - 10) + " страниц");
+                            break;
+                        }
+                    }
+                }
 
+                System.out.println("\n=== Статистика браузеров ===");
+                Map<String, Double> browserStats = statistics.getBrowserStatistics();
+                if (!browserStats.isEmpty()) {
+                    System.out.println("   Браузер       | Доля");
+                    System.out.println("   --------------|--------");
+                    for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
+                        System.out.printf("   %-13s | %.3f (%.1f%%)\n",
+                                entry.getKey(),
+                                entry.getValue(),
+                                entry.getValue() * 100);
+                    }
+
+                    double sum = 0;
+                    for (Double value : browserStats.values()) {
+                        sum += value;
+                    }
+                    System.out.printf("   Сумма долей: %.4f\n", sum);
+                } else {
+                    System.out.println("   Нет данных о браузерах");
+                }
             } else {
                 System.out.println("Файл пуст");
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("Файл не найден: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("Ошибка чтения файла: " + e.getMessage());
         } catch (LineTooLongException e) {
             System.out.println("Ошибка: " + e.getMessage());
         } catch (Exception e) {
