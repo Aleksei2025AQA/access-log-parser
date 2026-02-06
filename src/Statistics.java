@@ -14,6 +14,9 @@ public class Statistics {
     private HashSet<String> notFoundPages = new HashSet<>();
     private HashMap<String, Integer> osCount = new HashMap<>();
     private HashMap<String, Integer> browserCount = new HashMap<>();
+    private HashMap<Long, Integer> visitsPerSecond = new HashMap<>();
+    private HashSet<String> refererDomains = new HashSet<>();
+    private HashMap<String, Integer> userVisitsCount = new HashMap<>();
 
     private int errorRequestsCount = 0;
     private int nonBotVisitsCount = 0;
@@ -44,11 +47,21 @@ public class Statistics {
         boolean isBot = false;
 
         if (userAgent != null) {
-            String userAgentString = userAgent.getBrowser();
-            if (userAgentString != null) {
-                String lowerAgent = userAgentString.toLowerCase();
-                if (lowerAgent.contains("bot")) {
-                    isBot = true;
+            isBot = userAgent.isBot();
+
+            if (!isBot) {
+                long secondsKey = entryTime.toEpochSecond(java.time.ZoneOffset.UTC);
+                visitsPerSecond.put(secondsKey, visitsPerSecond.getOrDefault(secondsKey, 0) + 1);
+
+                String ip = entry.getIpAddr();
+                userVisitsCount.put(ip, userVisitsCount.getOrDefault(ip, 0) + 1);
+            }
+
+            String referer = entry.getReferer();
+            if (referer != null && !referer.isEmpty() && !referer.equals("-") && !referer.equals("\"-\"")) {
+                String domain = extractDomain(referer);
+                if (domain != null && !domain.isEmpty()) {
+                    refererDomains.add(domain);
                 }
             }
         }
@@ -78,6 +91,7 @@ public class Statistics {
             }
         }
     }
+
 
     public double getAverageVisitsPerHour() {
         if (minTime == null || maxTime == null || minTime.equals(maxTime) || nonBotVisitsCount == 0) {
@@ -199,4 +213,61 @@ public class Statistics {
 
         return osStatistics;
     }
+    private String extractDomain(String referer) {
+        try {
+            String cleanedReferer = referer.replace("\"", "");
+
+            if (!cleanedReferer.startsWith("http://") && !cleanedReferer.startsWith("https://")) {
+                return null;
+            }
+
+            String domain = cleanedReferer.replaceFirst("^(https?://)?(www\\.)?", "");
+            int slashIndex = domain.indexOf('/');
+            if (slashIndex != -1) {
+                domain = domain.substring(0, slashIndex);
+            }
+
+            int colonIndex = domain.indexOf(':');
+            if (colonIndex != -1) {
+                domain = domain.substring(0, colonIndex);
+            }
+
+            return domain;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public int getPeakVisitsPerSecond() {
+        if (visitsPerSecond.isEmpty()) {
+            return 0;
+        }
+
+        int maxVisits = 0;
+        for (int visits : visitsPerSecond.values()) {
+            if (visits > maxVisits) {
+                maxVisits = visits;
+            }
+        }
+        return maxVisits;
+    }
+
+    public Set<String> getRefererDomains() {
+        return new HashSet<>(refererDomains);
+    }
+
+    public int getMaxVisitsByUser() {
+        if (userVisitsCount.isEmpty()) {
+            return 0;
+        }
+
+        int maxVisits = 0;
+        for (int visits : userVisitsCount.values()) {
+            if (visits > maxVisits) {
+                maxVisits = visits;
+            }
+        }
+        return maxVisits;
+    }
+
 }

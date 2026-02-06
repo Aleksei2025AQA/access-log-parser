@@ -99,13 +99,29 @@ public class Main {
                 }
 
                 System.out.println("\n=== Новая статистика (Stream API) ===");
-                System.out.printf("Среднее количество посещений в час (только пользователи): %.2f\n",
-                        statistics.getAverageVisitsPerHour());
-                System.out.printf("Среднее количество ошибочных запросов в час: %.2f\n",
-                        statistics.getAverageErrorRequestsPerHour());
-                System.out.printf("Средняя посещаемость одним пользователем: %.2f\n",
-                        statistics.getAverageVisitsPerUser());
+                System.out.printf("Среднее количество посещений в час (только пользователи): %.2f\n", statistics.getAverageVisitsPerHour());
+                System.out.printf("Среднее количество ошибочных запросов в час: %.2f\n", statistics.getAverageErrorRequestsPerHour());
+                System.out.printf("Средняя посещаемость одним пользователем: %.2f\n", statistics.getAverageVisitsPerUser());
 
+                System.out.println("\n=== Статистика задания #2 ===");
+                System.out.println("Пиковая посещаемость (в секунду): " + statistics.getPeakVisitsPerSecond());
+
+                Set<String> refererDomains = statistics.getRefererDomains();
+                System.out.println("Сайты, ссылающиеся на текущий: " + refererDomains.size() + " доменов");
+                if (!refererDomains.isEmpty()) {
+                    System.out.println("Список доменов:");
+                    int counter = 1;
+                    for (String domain : refererDomains) {
+                        System.out.println("   " + counter + ". " + domain);
+                        counter++;
+                        if (counter > 10) {
+                            System.out.println("   ... и еще " + (refererDomains.size() - 10) + " доменов");
+                            break;
+                        }
+                    }
+                }
+
+                System.out.println("Максимальная посещаемость одним пользователем: " + statistics.getMaxVisitsByUser() + " посещений");
                 System.out.println("\n=== Результаты задания (Collections) ===");
                 Set<String> existingPages = statistics.getAllExistingPages();
                 System.out.println("\n1. Существующие страницы (код 200):");
@@ -122,16 +138,14 @@ public class Main {
                         }
                     }
                 }
+
                 Map<String, Double> osStats = statistics.getOperatingSystemStatistics();
                 System.out.println("\n2. Статистика операционных систем (доля):");
                 if (!osStats.isEmpty()) {
                     System.out.println("   ОС           | Доля");
                     System.out.println("   -------------|--------");
                     for (Map.Entry<String, Double> entry : osStats.entrySet()) {
-                        System.out.printf("   %-12s | %.3f (%.1f%%)\n",
-                                entry.getKey(),
-                                entry.getValue(),
-                                entry.getValue() * 100);
+                        System.out.printf("   %-12s | %.3f (%.1f%%)\n", entry.getKey(), entry.getValue(), entry.getValue() * 100);
                     }
                     double sum = 0;
                     for (Double value : osStats.values()) {
@@ -163,10 +177,7 @@ public class Main {
                     System.out.println("   Браузер       | Доля");
                     System.out.println("   --------------|--------");
                     for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
-                        System.out.printf("   %-13s | %.3f (%.1f%%)\n",
-                                entry.getKey(),
-                                entry.getValue(),
-                                entry.getValue() * 100);
+                        System.out.printf("   %-13s | %.3f (%.1f%%)\n", entry.getKey(), entry.getValue(), entry.getValue() * 100);
                     }
 
                     double sum = 0;
