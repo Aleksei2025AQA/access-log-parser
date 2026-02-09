@@ -213,6 +213,7 @@ public class Statistics {
 
         return osStatistics;
     }
+
     private String extractDomain(String referer) {
         try {
             String cleanedReferer = referer.replace("\"", "");
@@ -269,5 +270,4 @@ public class Statistics {
         }
         return maxVisits;
     }
-
 }
